@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Wake Me Up</string>
+    <string name="saved_locations">Saved Locations</string>
+    <string name="settings">Settings</string>
+</resources>

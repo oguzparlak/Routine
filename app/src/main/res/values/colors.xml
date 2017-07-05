@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#03a9f4</color>
+    <color name="colorPrimaryDark">#1e88e5</color>
+    <color name="colorAccent">#03a9f4</color>
+
+    <!-- Tag Colors -->
+    <color name="colorTagBlue">#1565c0</color>
+    <color name="colorTagOrange">#d84315</color>
+    <color name="colorTagRed">#b71c1c</color>
+    <color name="colorTagPurple">#4527a0</color>
+    <color name="colorTagGrey">#757575</color>
+    <color name="colorTagGreen">#33691e</color>
+    <color name="colorTagCyan">#00838f</color>
+    <color name="colorTagTeal">#00897b</color>
+    <color name="colorTagLime">#afb42b</color>
+    <color name="colorTagBrown">#795548</color>
+    <color name="colorTagDarkGrey">#424242</color>
+
+</resources>
