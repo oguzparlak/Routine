@@ -1,9 +1,13 @@
 package com.oguzparlak.wakemeup.utils;
 
+import android.content.Context;
+import android.support.v4.content.ContextCompat;
+
 import com.oguzparlak.wakemeup.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Oguz on 05/07/2017.
@@ -25,6 +29,12 @@ public class ColorUtils {
         colors.add(R.color.colorTagRed);
         colors.add(R.color.colorTagTeal);
         return colors;
+    }
+
+    public static int getRandomColor(Context context) {
+        Random random = new Random();
+        int randIndex = random.nextInt(getTagColors().size());
+        return ContextCompat.getColor(context, getTagColors().get(randIndex));
     }
 
 }
