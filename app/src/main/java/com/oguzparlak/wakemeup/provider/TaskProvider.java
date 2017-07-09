@@ -19,8 +19,6 @@ import android.support.annotation.Nullable;
 
 public class TaskProvider extends ContentProvider {
 
-    private static final String TAG = TaskProvider.class.getSimpleName();
-
     // Define code for directories and the items
     // in that directory to be used in matching URIs.
     // It's conventional to use 100, 200, 300 or directories

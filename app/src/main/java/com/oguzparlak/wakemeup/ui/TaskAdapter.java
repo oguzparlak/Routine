@@ -1,5 +1,6 @@
 package com.oguzparlak.wakemeup.ui;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -7,17 +8,23 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.provider.TaskContract;
+import com.oguzparlak.wakemeup.provider.TaskProvider;
 import com.oguzparlak.wakemeup.utils.ColorUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,9 +40,15 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private static final String TAG = TaskAdapter.class.getSimpleName();
 
     private Cursor mCursor;
+    private RecyclerViewOnClickListener mClickListener;
+    private RecyclerViewOnCheckedChangedListener mCheckedChangeListener;
     private Context mContext;
 
-    TaskAdapter(Context context) {
+    TaskAdapter(Context context,
+                RecyclerViewOnClickListener clickListener,
+                RecyclerViewOnCheckedChangedListener checkedChangedListener) {
+        mClickListener = clickListener;
+        mCheckedChangeListener = checkedChangedListener;
         mContext = context;
     }
 
@@ -54,6 +67,7 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
         String radius = String.valueOf(mCursor.getInt(mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_RADIUS)));
         boolean activated = (mCursor.getInt(mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_ACTIVE)) == 1);
         int color = mCursor.getInt(mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_COLOR));
+        final int id = mCursor.getInt(mCursor.getColumnIndex(TaskContract.TaskEntry._ID));
 
         holder.mPlaceTextView.setText(placeName);
         holder.mRadiusTextView.setText(radius + " km");
@@ -67,6 +81,24 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
         circleDrawable.setBounds(new Rect(20, 20, 20, 20));
         circleDrawable.getPaint().setColor(color);//you can give any color here
         holder.mTagTextView.setBackground(circleDrawable);
+
+        final int adapterPosition = holder.getAdapterPosition();
+
+        // This will be triggered when a row is clicked
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mClickListener.onItemClicked(view, adapterPosition, id);
+            }
+        });
+
+        // This will be triggered when switch is clicked
+        holder.mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                mCheckedChangeListener.onCheckChanged(checked, id);
+            }
+        });
     }
 
     @Override
@@ -91,33 +123,7 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
         TaskViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d(TAG, "onClick: Row Clicked");
-                }
-            });
         }
-
-        /**
-         * Switch Callback, update the database according to switch's value
-         * @param checked indicates whether the switch is checked or not
-         */
-        @OnCheckedChanged (R.id.geofence_enabled_switch)
-        void onSwitchChanged(boolean checked) {
-            int checkedValue = checked ? 1 : 0;
-            Log.d(TAG, "onSwitchChanged: cursorPosition: " + mCursor.getPosition());
-            ContentValues values = new ContentValues();
-            values.put(TaskContract.TaskEntry.COLUMN_ACTIVE, checkedValue);
-            // Update the database
-            /* mContext.getContentResolver().update(
-                    TaskContract.TaskEntry.CONTENT_URI,
-                    values,
-                    null,
-                    new String[]{mCursor.getString(mCursor.getColumnIndex(TaskContract.TaskEntry._ID))}); */
-        }
-        
     }
 
 }
