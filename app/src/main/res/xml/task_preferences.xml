@@ -1,0 +1,29 @@
+<android.support.v7.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Category 1">
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="key_1"
+            android:title="Switch Preference"
+            android:summary="Switch Summary"
+            android:defaultValue="true" />
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="key_2"
+            android:title="Edit Text Preference"
+            android:summary="Edit Text Summary"
+            android:dialogMessage="Edit Text Dialog Message"
+            android:defaultValue="Default Value"
+            android:dialogLayout="@layout/pref_dialog_edittext"/>
+
+        <android.support.v7.preference.CheckBoxPreference
+            android:key="key_3"
+            android:title="Checkbox Preference"
+            android:summary="Checkbox Summary"
+            android:defaultValue="true" />
+
+    </android.support.v7.preference.PreferenceCategory>
+
+</android.support.v7.preference.PreferenceScreen>

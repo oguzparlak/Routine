@@ -1,16 +1,11 @@
 package com.oguzparlak.wakemeup.ui;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,16 +15,9 @@ import android.widget.TextView;
 
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.provider.TaskContract;
-import com.oguzparlak.wakemeup.provider.TaskProvider;
-import com.oguzparlak.wakemeup.utils.ColorUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 
 /**
  * Created by Oguz on 06/07/2017.
@@ -40,13 +28,13 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private static final String TAG = TaskAdapter.class.getSimpleName();
 
     private Cursor mCursor;
-    private RecyclerViewOnClickListener mClickListener;
-    private RecyclerViewOnCheckedChangedListener mCheckedChangeListener;
+    private ListItemClickListener mClickListener;
+    private CheckedChangeListener mCheckedChangeListener;
     private Context mContext;
 
     TaskAdapter(Context context,
-                RecyclerViewOnClickListener clickListener,
-                RecyclerViewOnCheckedChangedListener checkedChangedListener) {
+                ListItemClickListener clickListener,
+                CheckedChangeListener checkedChangedListener) {
         mClickListener = clickListener;
         mCheckedChangeListener = checkedChangedListener;
         mContext = context;

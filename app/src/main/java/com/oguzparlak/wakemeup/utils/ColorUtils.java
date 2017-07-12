@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class ColorUtils {
 
-    public static List<Integer> getTagColors() {
+    private static List<Integer> getTagColors() {
         List<Integer> colors = new ArrayList<>();
         colors.add(R.color.colorTagBlue);
         colors.add(R.color.colorTagBrown);
