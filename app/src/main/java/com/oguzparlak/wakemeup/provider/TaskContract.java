@@ -3,10 +3,6 @@ package com.oguzparlak.wakemeup.provider;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by Oguz on 06/07/2017.
- */
-
 public class TaskContract {
 
     // A string that identifies the entire content provider

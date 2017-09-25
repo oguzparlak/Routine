@@ -20,4 +20,13 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
+    <TextView
+        android:id="@+id/default_message_text_view"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:text="@string/add_a_location_to_start"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>

@@ -6,10 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import static com.oguzparlak.wakemeup.provider.TaskContract.TaskEntry.TABLE_NAME;
 
-/**
- * Created by Oguz on 06/07/2017.
- */
-
 public class TaskDbHelper extends SQLiteOpenHelper {
 
     // The database name

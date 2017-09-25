@@ -12,12 +12,11 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-/**
- * Created by Oguz on 06/07/2017.
- */
+import android.util.Log;
 
 public class TaskProvider extends ContentProvider {
+
+    private static final String TAG = TaskProvider.class.getSimpleName();
 
     // Define code for directories and the items
     // in that directory to be used in matching URIs.
@@ -148,7 +147,7 @@ public class TaskProvider extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
         int matchCode = sUriMatcher.match(uri);
-        int numRowsAffected = 0;
+        int numRowsAffected;
         switch (matchCode) {
             case TASK_WITH_ID:
                 // Get the task id from the URI Path 0 -> Count, 1-> Id

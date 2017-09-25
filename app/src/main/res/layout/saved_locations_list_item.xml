@@ -20,7 +20,6 @@
         android:textColor="@android:color/white"
         android:background="@drawable/circular_textview"/>
 
-
     <TextView
         android:id="@+id/list_item_place_name_text"
         android:text="Beylerbeyi"
@@ -30,6 +29,8 @@
         android:layout_marginStart="4dp"
         android:layout_toEndOf="@+id/list_item_tag_image"
         android:layout_toRightOf="@+id/list_item_tag_image"
+        android:maxWidth="200dp"
+        android:maxLines="1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

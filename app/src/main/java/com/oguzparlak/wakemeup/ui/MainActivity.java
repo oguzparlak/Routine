@@ -11,10 +11,8 @@ import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.PermissionChecker;
@@ -28,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -38,6 +37,8 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.provider.TaskContract;
+import com.oguzparlak.wakemeup.ui.adapter.TaskRecyclerAdapter;
+import com.oguzparlak.wakemeup.utils.ColorUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,14 +47,11 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         ListItemClickListener,
-        CheckedChangeListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    // TODO 1-) Handle Layout changes when switch is clicked
-    // TODO 2-) Add Geofence Support to your app...
-
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final int LOADER_ID = 1;
     private static final int PLACE_PICKER_REQUEST = 2;
     private static final int LOCATION_REQUEST = 3;
@@ -76,9 +74,10 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.progress_bar) ProgressBar mProgressBar;
+    @BindView(R.id.default_message_text_view) TextView mDefaultTextView;
 
-    private TaskAdapter mTaskAdapter;
     private GoogleApiClient mGoogleApiClient;
+    private TaskRecyclerAdapter mTaskAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +101,6 @@ public class MainActivity extends AppCompatActivity implements
                 layoutManager.getOrientation()
         );
         mLocationRecycler.addItemDecoration(dividerItemDecoration);
-        mTaskAdapter = new TaskAdapter(this, this, this);
-        mLocationRecycler.setAdapter(mTaskAdapter);
 
         // Hide fab according to RecyclerView's scroll behavior
         mLocationRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -123,28 +120,12 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        /*
-
-        if (savedInstanceState == null) {
-            // Insert some dummy data
-            ContentValues values = new ContentValues();
-            values.put(TaskContract.TaskEntry.COLUMN_TAG, "Santa Clara Valley");
-            values.put(TaskContract.TaskEntry.COLUMN_PLACE_ID, "123");
-            values.put(TaskContract.TaskEntry.COLUMN_RADIUS, 1);
-            values.put(TaskContract.TaskEntry.COLUMN_ACTIVE, 1);
-            values.put(TaskContract.TaskEntry.COLUMN_COLOR, ColorUtils.getRandomColor(this));
-
-            getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, values);
-        }
-
-        */
-
         // Start the loader
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
         setupGoogleApiClient();
     }
-    
+
     private synchronized void setupGoogleApiClient() {
         // Setup Google Api Client
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -154,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .enableAutoManage(this, this)
                 .build();
-
     }
 
     // Requests Location Permission
@@ -202,10 +182,19 @@ public class MainActivity extends AppCompatActivity implements
                 Place place = PlacePicker.getPlace(this, data);
                 Log.d(TAG, "onActivityResult: Selected Place Name: " + place.getName());
                 showUI();
+                // Test, Insert
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(TaskContract.TaskEntry.COLUMN_PLACE_ID, place.getId());
+                contentValues.put(TaskContract.TaskEntry.COLUMN_TAG, place.getName().toString());
+                contentValues.put(TaskContract.TaskEntry.COLUMN_ACTIVE, 1);
+                contentValues.put(TaskContract.TaskEntry.COLUMN_COLOR, ColorUtils.getRandomColor(this));
+                contentValues.put(TaskContract.TaskEntry.COLUMN_RADIUS, 1);
+                // END TEST
+                getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, contentValues);
                 // Open TaskPreferencesActivity
-                Intent preferenceIntent = new Intent(MainActivity.this, TaskPreferencesActivity.class);
-                preferenceIntent.putExtra(TaskPreferencesActivity.PLACE_NAME_EXTRA, place.getName());
-                startActivity(preferenceIntent);
+                // Intent preferenceIntent = new Intent(MainActivity.this, TaskPreferencesActivity.class);
+                // preferenceIntent.putExtra(TaskPreferencesActivity.PLACE_NAME_EXTRA, place.getName());
+                // tartActivity(preferenceIntent);
             } else if (resultCode == RESULT_CANCELED) {
                 Log.d(TAG, "onActivityResult: User cancelled the Place Picker Intent");
                 showUI();
@@ -217,11 +206,13 @@ public class MainActivity extends AppCompatActivity implements
     private void hideUI() {
         mLocationRecycler.setVisibility(View.INVISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
+        mDefaultTextView.setVisibility(View.INVISIBLE);
     }
 
     private void showUI() {
         mLocationRecycler.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.INVISIBLE);
+        mDefaultTextView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -229,6 +220,9 @@ public class MainActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
+    /**
+     * Menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -249,36 +243,43 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Loader Callbacks
      */
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG, "onCreateLoader: Loader created for the first time");
         return new CursorLoader(this,
                 TaskContract.TaskEntry.CONTENT_URI,
                 PROJECTION,
                 null,
                 null,
-                null);
+                TaskContract.TaskEntry.COLUMN_ACTIVE + " DESC");
     }
 
     @Override
     public void onLoadFinished(Loader loader, Cursor cursor) {
-        Log.d(TAG, "onLoadFinished: Cursor updated");
-        mProgressBar.setVisibility(View.INVISIBLE);
+        showUI();
+
+        // Set the adapter
+        if (mTaskAdapter == null) {
+            mTaskAdapter = new TaskRecyclerAdapter(cursor, this, this);
+            mLocationRecycler.setAdapter(mTaskAdapter);
+        }
+
+        // Show or hide the default text message
+        if (mTaskAdapter.getItemCount() > 0)
+            mDefaultTextView.setVisibility(View.INVISIBLE);
+        else
+            mDefaultTextView.setVisibility(View.VISIBLE);
+
         mTaskAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(TAG, "onLoaderReset: Cursor removed");
         mTaskAdapter.swapCursor(null);
     }
 
     /**
      * RecyclerView Touch Events Callbacks
      */
-
-    // Create a new Intent to PreferenceActivity
     @Override
     public void onItemClicked(View v, int position, int id) {
         Intent intent = new Intent(MainActivity.this, TaskPreferencesActivity.class);
@@ -319,7 +320,6 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Google Api Callbacks
      */
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "onConnected: ");
