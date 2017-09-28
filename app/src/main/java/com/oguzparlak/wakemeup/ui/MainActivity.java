@@ -36,6 +36,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.oguzparlak.wakemeup.R;
+import com.oguzparlak.wakemeup.constants.Constants;
 import com.oguzparlak.wakemeup.provider.TaskContract;
 import com.oguzparlak.wakemeup.ui.adapter.TaskRecyclerAdapter;
 import com.oguzparlak.wakemeup.utils.ColorUtils;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int LOADER_ID = 1;
     private static final int PLACE_PICKER_REQUEST = 2;
     private static final int LOCATION_REQUEST = 3;
+    private static final int EDIT_TASK_REQUEST = 4;
 
     // Projection, define which columns to return
     private static final String[] PROJECTION =
@@ -180,24 +182,27 @@ public class MainActivity extends AppCompatActivity implements
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                Log.d(TAG, "onActivityResult: Selected Place Name: " + place.getName());
                 showUI();
                 // Test, Insert
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(TaskContract.TaskEntry.COLUMN_PLACE_ID, place.getId());
-                contentValues.put(TaskContract.TaskEntry.COLUMN_TAG, place.getName().toString());
-                contentValues.put(TaskContract.TaskEntry.COLUMN_ACTIVE, 1);
-                contentValues.put(TaskContract.TaskEntry.COLUMN_COLOR, ColorUtils.getRandomColor(this));
-                contentValues.put(TaskContract.TaskEntry.COLUMN_RADIUS, 1);
+                // ContentValues contentValues = new ContentValues();
+                // contentValues.put(TaskContract.TaskEntry.COLUMN_PLACE_ID, place.getId());
+                // contentValues.put(TaskContract.TaskEntry.COLUMN_TAG, place.getName().toString());
+                // contentValues.put(TaskContract.TaskEntry.COLUMN_ACTIVE, 1);
+                // contentValues.put(TaskContract.TaskEntry.COLUMN_COLOR, ColorUtils.getRandomColor(this));
+                // contentValues.put(TaskContract.TaskEntry.COLUMN_RADIUS, 1);
                 // END TEST
-                getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, contentValues);
+                // getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, contentValues);
                 // Open TaskPreferencesActivity
-                // Intent preferenceIntent = new Intent(MainActivity.this, TaskPreferencesActivity.class);
-                // preferenceIntent.putExtra(TaskPreferencesActivity.PLACE_NAME_EXTRA, place.getName());
-                // tartActivity(preferenceIntent);
+                Intent preferenceIntent = new Intent(MainActivity.this, TaskPreferencesActivity.class);
+                preferenceIntent.putExtra(TaskPreferencesActivity.PLACE_NAME_EXTRA, place.getName());
+                preferenceIntent.putExtra(Constants.PREFERENCE_ID, place.getId());
+                startActivityForResult(preferenceIntent, EDIT_TASK_REQUEST);
             } else if (resultCode == RESULT_CANCELED) {
-                Log.d(TAG, "onActivityResult: User cancelled the Place Picker Intent");
                 showUI();
+            }
+        } else if (requestCode == EDIT_TASK_REQUEST) {
+            if (resultCode == RESULT_OK && data != null) {
+                // Handle PreferenceActivity callbacks here
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -290,10 +295,15 @@ public class MainActivity extends AppCompatActivity implements
                 new String[]{String.valueOf(id)},
                 null);
         if (cursor != null) {
-            cursor.moveToPosition(0);
+            cursor.moveToFirst();
+
             String placeName = cursor.getString(cursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_TAG));
+            String placeId = cursor.getString(cursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_PLACE_ID));
+
             intent.putExtra(TaskPreferencesActivity.PLACE_NAME_EXTRA, placeName);
-            startActivity(intent);
+            intent.putExtra(Constants.PREFERENCE_ID, placeId);
+            startActivityForResult(intent, EDIT_TASK_REQUEST);
+
             cursor.close();
         }
     }

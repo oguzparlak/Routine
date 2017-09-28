@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by Oguz on 05/07/2017.
- */
+ * @author Oguz Parlak
+ * <p>
+ * Helper class to define color operations for each task
+ * </p/
+ **/
 
 public class ColorUtils {
 

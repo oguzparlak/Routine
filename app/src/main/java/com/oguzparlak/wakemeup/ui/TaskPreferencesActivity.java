@@ -1,5 +1,6 @@
 package com.oguzparlak.wakemeup.ui;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.oguzparlak.wakemeup.R;
+import com.oguzparlak.wakemeup.constants.Constants;
 
 public class TaskPreferencesActivity extends AppCompatActivity {
 
@@ -23,6 +25,22 @@ public class TaskPreferencesActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getIntent().getStringExtra(PLACE_NAME_EXTRA));
         }
+
+        // Init PrefrenceFragment
+        TaskPreferencesFragment taskPreferencesFragment = new TaskPreferencesFragment();
+
+        // Set arguments
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.PREFERENCE_ID, getIntent().getStringExtra(Constants.PREFERENCE_ID));
+        taskPreferencesFragment.setArguments(bundle);
+
+        // Attach fragment to Activity
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager
+                .beginTransaction()
+                .add(R.id.preference_fragment_holder, taskPreferencesFragment)
+                .commit();
+
     }
 
     @Override
