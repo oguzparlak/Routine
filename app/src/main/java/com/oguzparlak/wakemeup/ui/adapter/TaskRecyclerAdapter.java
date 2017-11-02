@@ -9,13 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.provider.TaskContract;
-import com.oguzparlak.wakemeup.ui.ListItemClickListener;
+import com.oguzparlak.wakemeup.ui.callbacks.ListItemClickListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +28,10 @@ public class TaskRecyclerAdapter extends RecyclerViewCursorAdapter<TaskRecyclerA
         super(cursor);
         mContext = context;
         mListItemClickListener = listItemClickListener;
+    }
+
+    public TaskRecyclerAdapter(Context context, ListItemClickListener listItemClickListener) {
+        this(null, context, listItemClickListener);
     }
 
     @Override
@@ -57,25 +60,17 @@ public class TaskRecyclerAdapter extends RecyclerViewCursorAdapter<TaskRecyclerA
         holder.mTagTextView.setBackground(circleDrawable);
 
         // This will be triggered when a row is clicked
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mListItemClickListener.onItemClicked(view, adapterPosition, id);
-            }
-        });
+        holder.itemView.setOnClickListener(view
+                -> mListItemClickListener.onItemClicked(view, adapterPosition, id));
 
         // This block will be triggered when user interacts with switch
-        holder.mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                mListItemClickListener.onCheckChanged(isChecked, id);
-            }
-        });
+        holder.mSwitch.setOnCheckedChangeListener((compoundButton, isChecked)
+                -> mListItemClickListener.onCheckChanged(isChecked, id));
     }
 
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(mContext).inflate(R.layout.saved_locations_list_item, parent, false);
+        View v = LayoutInflater.from(mContext).inflate(R.layout.task_item_layout, parent, false);
         return new TaskViewHolder(v);
     }
 

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#03a9f4</color>
-    <color name="colorPrimaryDark">#1e88e5</color>
-    <color name="colorAccent">#03a9f4</color>
+    <color name="colorPrimaryDark">#2196f3</color>
+    <color name="colorAccent">@color/colorPrimary</color>
+
+    <!-- Material Colors -->
+    <color name="colorMaterialOrange">#d50000</color>
 
     <!-- Tag Colors -->
     <color name="colorTagBlue">#1565c0</color>
@@ -16,5 +19,8 @@
     <color name="colorTagLime">#afb42b</color>
     <color name="colorTagBrown">#795548</color>
     <color name="colorTagDarkGrey">#424242</color>
+
+    <color name="white">@android:color/white</color>
+    <color name="colorLightGrey">#e0e0e0</color>
 
 </resources>

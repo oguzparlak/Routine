@@ -1,4 +1,4 @@
-package com.oguzparlak.wakemeup.ui;
+package com.oguzparlak.wakemeup.ui.fragment;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;

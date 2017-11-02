@@ -1,4 +1,4 @@
-package com.oguzparlak.wakemeup.ui;
+package com.oguzparlak.wakemeup.ui.activity;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
@@ -10,6 +10,7 @@ import android.view.MenuItem;
 
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.constants.Constants;
+import com.oguzparlak.wakemeup.ui.fragment.TaskPreferencesFragment;
 
 public class TaskPreferencesActivity extends AppCompatActivity {
 
@@ -26,21 +27,22 @@ public class TaskPreferencesActivity extends AppCompatActivity {
             actionBar.setTitle(getIntent().getStringExtra(PLACE_NAME_EXTRA));
         }
 
-        // Init PrefrenceFragment
-        TaskPreferencesFragment taskPreferencesFragment = new TaskPreferencesFragment();
+        if (savedInstanceState == null) {
+            // Init PreferenceFragment
+            TaskPreferencesFragment taskPreferencesFragment = new TaskPreferencesFragment();
 
-        // Set arguments
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.PREFERENCE_ID, getIntent().getStringExtra(Constants.PREFERENCE_ID));
-        taskPreferencesFragment.setArguments(bundle);
+            // Set arguments
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.PREFERENCE_ID, getIntent().getStringExtra(Constants.PREFERENCE_ID));
+            taskPreferencesFragment.setArguments(bundle);
 
-        // Attach fragment to Activity
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager
-                .beginTransaction()
-                .add(R.id.preference_fragment_holder, taskPreferencesFragment)
-                .commit();
-
+            // Attach fragment to Activity
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager
+                    .beginTransaction()
+                    .add(R.id.preference_fragment_holder, taskPreferencesFragment)
+                    .commit();
+        }
     }
 
     @Override

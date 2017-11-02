@@ -8,5 +8,5 @@ package com.oguzparlak.wakemeup.model;
  **/
 
 public enum NotificationChoice {
-    ALARM_ONLY, NOTIFICATION_ONLY, ALARM_AND_NOTIFICATION, NONE
+    ALARM_ONLY, NOTIFICATION_ONLY, ALARM_AND_NOTIFICATION
 }

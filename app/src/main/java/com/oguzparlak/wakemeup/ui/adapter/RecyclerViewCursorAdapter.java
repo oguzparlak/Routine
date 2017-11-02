@@ -13,7 +13,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
 
     public abstract void onBindViewHolder(VH holder, Cursor cursor);
 
-    public RecyclerViewCursorAdapter(Cursor cursor) {
+    RecyclerViewCursorAdapter(Cursor cursor) {
         setHasStableIds(true);
         swapCursor(cursor);
     }

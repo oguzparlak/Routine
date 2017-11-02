@@ -4,29 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.oguzparlak.wakemeup.ui.MainActivity"
+    tools:context="com.oguzparlak.wakemeup.ui.activity.MainActivity"
     tools:showIn="@layout/activity_main">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/saved_places_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
-
-    <TextView
-        android:id="@+id/default_message_text_view"
-        android:textSize="18sp"
-        android:textAlignment="center"
-        android:text="@string/add_a_location_to_start"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
 </RelativeLayout>

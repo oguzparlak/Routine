@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -10,12 +10,12 @@
         <item name="alertDialogTheme">@style/AppAlertDialog</item>
     </style>
 
-    <style name="AppAlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert" >
+    <style name="AppAlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <!-- To keep the color of the Dialog's button colors -->
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppAlertDialogContent" parent="Theme.AppCompat.DayNight" >
+    <style name="AppAlertDialogContent" parent="Theme.AppCompat.DayNight">
         <!-- To keep the color of EditText -->
         <item name="colorAccent">@color/colorAccent</item>
     </style>

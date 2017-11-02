@@ -1,4 +1,4 @@
-package com.oguzparlak.wakemeup.ui;
+package com.oguzparlak.wakemeup.ui.callbacks;
 
 import android.view.View;
 

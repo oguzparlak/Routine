@@ -5,30 +5,67 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.oguzparlak.wakemeup.ui.MainActivity">
+    tools:context="com.oguzparlak.wakemeup.ui.activity.MainActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/hind_bold"
+                android:text="Routine"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            app:tabMode="scrollable"
+            app:tabIndicatorColor="@color/white"
+            app:tabGravity="center"/>
 
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_main" />
 
+    <com.oguzparlak.wakemeup.ui.NonSwipeableWiewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/add_location_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp" />
+        android:src="@drawable/ic_directions_white_24dp"
+        app:backgroundTint="@color/colorMaterialOrange"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="end|bottom|end"/>
+
+    <include layout="@layout/bottom_sheet" />
+
 
 </android.support.design.widget.CoordinatorLayout>

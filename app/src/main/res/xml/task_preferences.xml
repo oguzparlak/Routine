@@ -5,6 +5,7 @@
         android:title="Category 1">
 
         <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="key_switch"
             android:title="Switch Preference"
             android:summary="Switch Summary"
             android:defaultValue="true" />
@@ -18,6 +19,7 @@
             android:dialogLayout="@layout/pref_dialog_edittext"/>
 
         <android.support.v7.preference.CheckBoxPreference
+            android:key="key_checkbox"
             android:title="Checkbox Preference"
             android:summary="Checkbox Summary"
             android:summaryOn="Summary On"

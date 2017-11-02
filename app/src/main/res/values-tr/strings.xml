@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Routine</string>
+    <string name="add_a_location_to_start">Sanırım buralarda yenisin. Başlamak için sağ alttaki (+) butonunu kullan.</string>
+    <string name="locations">Lokasyonlar</string>
+    <string name="map">Harita</string>
+    <string name="remove">Sil</string>
+    <string name="saved_locations">Kayıtlı Lokasyonlar</string>
+    <string name="settings">Ayarlar</string>
+</resources>
