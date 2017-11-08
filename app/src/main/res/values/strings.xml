@@ -12,4 +12,6 @@
     <string name="title_activity_maps">Map</string>
     <string name="tracker_welcome_message">Tracker welcomes you. Here you can see your daily movement activities such as going to job with your car or going for a walk on a beautiful shiny day !</string>
     <string name="allow_tracking">Allow Tracking</string>
+    <string name="no_connection">Connection Lost</string>
+    <string name="current_location">Current Location</string>
 </resources>

@@ -42,11 +42,17 @@ dependencies {
     // Maps
     compile 'com.google.android.gms:play-services-maps:11.4.2'
 
-    // Google Location and Activity Recoginition
+    // Google Location and Activity Recognition
     compile 'com.google.android.gms:play-services-location:11.4.2'
 
     // Lottie
     compile 'com.airbnb.android:lottie:2.2.5'
+
+    // OkHttp
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+
+    //Gson
+    compile 'com.google.code.gson:gson:2.8.2'
 
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'

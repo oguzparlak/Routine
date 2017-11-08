@@ -12,6 +12,18 @@ import com.oguzparlak.wakemeup.provider.TaskContract;
 public class Constants {
 
     /**
+     * Extras
+     */
+    public static final String DESTINATION_ADDRESS_EXTRA = "destination_extra";
+    public static final String DURATION_EXTRA = "duration_extra";
+    public static final String DISTANCE_EXTRA = "distance_extra";
+
+    /**
+     * Distance Matrix API KEY
+     */
+    public static final String KEY_DISTANCE_MATRIX_API = "AIzaSyBu6ekko3_f9DCCcdKLqi-59JNdjABB9bs";
+
+    /**
      * Request Ids
      */
     public static final int EDIT_TASK_REQUEST = 4;

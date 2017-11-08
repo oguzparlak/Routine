@@ -1,10 +1,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <solid android:color="#5c6bc0" />
+    <solid android:color="#03a9f4" />
 
     <stroke
         android:width="2dp"
-        android:color="#5c6bc0" />
+        android:color="#03a9f4" />
 
     <corners
         android:bottomLeftRadius="20dp"

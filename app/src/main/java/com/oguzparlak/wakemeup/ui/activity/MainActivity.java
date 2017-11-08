@@ -1,21 +1,14 @@
 package com.oguzparlak.wakemeup.ui.activity;
 
-import android.Manifest;
-import android.content.AsyncQueryHandler;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.PermissionChecker;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,40 +16,40 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.oguzparlak.wakemeup.R;
-import com.oguzparlak.wakemeup.constants.Constants;
-import com.oguzparlak.wakemeup.provider.TaskContract;
+import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
 import com.oguzparlak.wakemeup.ui.adapter.SectionsPagerAdapter;
+import com.oguzparlak.wakemeup.ui.callbacks.DistanceMatrixCallback;
 import com.oguzparlak.wakemeup.ui.callbacks.GooglePlaceSelectionListener;
 import com.oguzparlak.wakemeup.ui.callbacks.ListItemClickListener;
+import com.oguzparlak.wakemeup.ui.callbacks.TaskListFragmentCallbacks;
 import com.oguzparlak.wakemeup.ui.fragment.MapFragment;
 import com.oguzparlak.wakemeup.ui.fragment.TaskListFragment;
-import com.oguzparlak.wakemeup.ui.callbacks.TaskListFragmentCallbacks;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         ListItemClickListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        DistanceMatrixCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int PLACE_PICKER_REQUEST = 2;
     private static final int AUTO_COMPLETE_REQUEST = 5;
 
     /**
@@ -66,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.add_location_fab) FloatingActionButton mFab;
     @BindView(R.id.view_pager) ViewPager mViewPager;
     @BindView(R.id.tabs) TabLayout mTabLayout;
+    @BindView(R.id.bottom_sheet) View mBottomSheet;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -74,7 +68,19 @@ public class MainActivity extends AppCompatActivity implements
     // Callback of AutoCompleteWidget
     private GooglePlaceSelectionListener mPlaceSelectionListener;
 
+    // BottomSheet
     private BottomSheetBehavior mBottomSheetBehavior;
+    private TextView mDestinationAddressTextView;
+    private TextView mDurationTextView;
+    private TextView mDistanceTextView;
+    private ImageView mCurrentLocationImageView;
+    private View mDivider;
+    private TextView mAddressIndicator;
+    private TextView mCurrentLocationLabel;
+
+    // Fab
+    CoordinatorLayout.LayoutParams mFabLayoutParams;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements
 
         // Apply ButterKnife
         ButterKnife.bind(this);
+
+        mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
 
         setSupportActionBar(mToolbar);
 
@@ -100,7 +108,38 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout.getTabAt(1).setIcon(R.drawable.ic_location_on_white_24dp);
         mTabLayout.getTabAt(2).setIcon(R.drawable.ic_transfer_within_a_station_white_24dp);
 
+        // Hide BottomSheet by default
+        mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBottomSheetBehavior.setHideable(true);
+
+        // State Listener
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    mFabLayoutParams.setAnchorId(View.NO_ID);
+                    mFab.setLayoutParams(mFabLayoutParams);
+                    mFab.hide();
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
+        mDestinationAddressTextView = mBottomSheet.findViewById(R.id.destination_address_text_view);
+        mDurationTextView = mBottomSheet.findViewById(R.id.estimated_time_text_view);
+        mDistanceTextView = mBottomSheet.findViewById(R.id.distance_text_view);
+        mCurrentLocationImageView = mBottomSheet.findViewById(R.id.current_location_image_view);
+        mDivider = mBottomSheet.findViewById(R.id.divider);
+        mAddressIndicator = mBottomSheet.findViewById(R.id.destination_label);
+        mCurrentLocationLabel = mBottomSheet.findViewById(R.id.current_location_label);
     }
+
+
 
     @Override
     public void onAttachFragment(Fragment fragment) {
@@ -129,13 +168,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @OnClick (R.id.add_location_fab)
     void addFabClicked() {
-        // TEST
-        // Pop BottomSheet
-        View bottomSheet = findViewById(R.id.bottom_sheet);
-        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setPeekHeight(0);
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        // END TEST
+        // TODO Implement it later
     }
 
     @Override
@@ -218,4 +251,60 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onCheckChanged(boolean checked, int id) { }
+
+    @Override
+    public void onPrepare() {
+        // Show a progress bar to user
+        ProgressBar progressBar = mBottomSheet.findViewById(R.id.bottom_sheet_progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        // Hide other View components
+        mDestinationAddressTextView.setVisibility(View.INVISIBLE);
+        mDurationTextView.setVisibility(View.INVISIBLE);
+        mDistanceTextView.setVisibility(View.INVISIBLE);
+        mCurrentLocationImageView.setVisibility(View.INVISIBLE);
+        mDivider.setVisibility(View.INVISIBLE);
+        mAddressIndicator.setVisibility(View.INVISIBLE);
+        mCurrentLocationLabel.setVisibility(View.INVISIBLE);
+
+        // Pop BottomSheet
+        mBottomSheetBehavior.setPeekHeight(600);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+        mFabLayoutParams.setAnchorId(R.id.bottom_sheet);
+        mFab.setLayoutParams(mFabLayoutParams);
+    }
+
+    /**
+     * Triggered when a model is received from fragment
+     */
+    @Override
+    public void onModelReceived(MatrixDistanceModel model) {
+        // Bottom Sheet
+        runOnUiThread(() -> {
+
+            // Hide the progressbar
+            ProgressBar progressBar = mBottomSheet.findViewById(R.id.bottom_sheet_progress_bar);
+            progressBar.setVisibility(View.INVISIBLE);
+
+            // Set visible other components
+            mDestinationAddressTextView.setVisibility(View.VISIBLE);
+            mDurationTextView.setVisibility(View.VISIBLE);
+            mDistanceTextView.setVisibility(View.VISIBLE);
+            mCurrentLocationImageView.setVisibility(View.VISIBLE);
+            mDivider.setVisibility(View.VISIBLE);
+            mAddressIndicator.setVisibility(View.VISIBLE);
+            mCurrentLocationLabel.setVisibility(View.VISIBLE);
+
+            mDestinationAddressTextView.setText(model.getDestinationAddress());
+            mDurationTextView.setText("Duration: " + model.getDuration());
+            mDistanceTextView.setText("Distance: " + model.getDistance());
+            mAddressIndicator.setText(model.getDestinationAddress().substring(0, 1));
+
+            // Show fab
+            mFab.show();
+
+
+        });
+    }
 }
