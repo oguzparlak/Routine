@@ -1,6 +1,10 @@
 package com.oguzparlak.wakemeup.ui.activity;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,6 +12,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -24,12 +29,19 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
+import com.oguzparlak.wakemeup.service.GeofenceTransitionIntentService;
 import com.oguzparlak.wakemeup.ui.adapter.SectionsPagerAdapter;
 import com.oguzparlak.wakemeup.ui.callbacks.DistanceMatrixCallback;
 import com.oguzparlak.wakemeup.ui.callbacks.GooglePlaceSelectionListener;
@@ -37,6 +49,9 @@ import com.oguzparlak.wakemeup.ui.callbacks.ListItemClickListener;
 import com.oguzparlak.wakemeup.ui.callbacks.TaskListFragmentCallbacks;
 import com.oguzparlak.wakemeup.ui.fragment.MapFragment;
 import com.oguzparlak.wakemeup.ui.fragment.TaskListFragment;
+import com.oguzparlak.wakemeup.utils.GeofenceBuilder;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,11 +71,19 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Views
      */
-    @BindView(R.id.toolbar) Toolbar mToolbar;
-    @BindView(R.id.add_location_fab) FloatingActionButton mFab;
-    @BindView(R.id.view_pager) ViewPager mViewPager;
-    @BindView(R.id.tabs) TabLayout mTabLayout;
-    @BindView(R.id.bottom_sheet) View mBottomSheet;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.add_location_fab)
+    FloatingActionButton mFab;
+    @BindView(R.id.view_pager)
+    ViewPager mViewPager;
+    @BindView(R.id.tabs)
+    TabLayout mTabLayout;
+    @BindView(R.id.bottom_sheet)
+    View mBottomSheet;
+
+    // Fab
+    CoordinatorLayout.LayoutParams mFabLayoutParams;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -69,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
     // Callback of AutoCompleteWidget
     private GooglePlaceSelectionListener mPlaceSelectionListener;
 
-    // BottomSheet
+    // BottomSheet View Components
     private BottomSheetBehavior mBottomSheetBehavior;
     private TextView mDestinationAddressTextView;
     private TextView mDurationTextView;
@@ -78,6 +101,22 @@ public class MainActivity extends AppCompatActivity implements
     private View mDivider;
     private TextView mAddressIndicator;
     private TextView mCurrentLocationLabel;
+
+    /**
+     * Geofencing client will register or
+     * unregiser Geofences
+     */
+    private GeofencingClient mGeofencingClient;
+
+    /**
+     * Will be used to calculate GeofenceService
+     */
+    private PendingIntent mGeofencingPendingIntent;
+
+    /**
+     * Utility class to build geofences
+     */
+    private GeofenceBuilder mGeofenceBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +132,11 @@ public class MainActivity extends AppCompatActivity implements
             getSupportActionBar().setTitle("");
 
         setupGoogleApiClient();
+
+        // Get GeofencingClient
+        mGeofencingClient = LocationServices.getGeofencingClient(this);
+
+        mGeofenceBuilder = new GeofenceBuilder();
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         mViewPager.setAdapter(sectionsPagerAdapter);
@@ -112,11 +156,7 @@ public class MainActivity extends AppCompatActivity implements
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    // mFabLayoutParams.setAnchorId(View.NO_ID);
-                    // mFab.setLayoutParams(mFabLayoutParams);
-                    // mFab.hide();
-                }
+                // do nothing for now
             }
 
             @Override
@@ -142,9 +182,23 @@ public class MainActivity extends AppCompatActivity implements
         mDivider = mBottomSheet.findViewById(R.id.divider);
         mAddressIndicator = mBottomSheet.findViewById(R.id.destination_label);
         mCurrentLocationLabel = mBottomSheet.findViewById(R.id.current_location_label);
+
+        mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
     }
 
+    private PendingIntent getGeofencingPendingIntent() {
+        // Reuse the PendingIntent if it already exists
+        if (mGeofencingPendingIntent != null) {
+            return mGeofencingPendingIntent;
+        }
 
+        Intent intent = new Intent(this, GeofenceTransitionIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        mGeofencingPendingIntent = PendingIntent.getService(this, 0,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return mGeofencingPendingIntent;
+    }
 
     @Override
     public void onAttachFragment(Fragment fragment) {
@@ -171,10 +225,19 @@ public class MainActivity extends AppCompatActivity implements
                 .build();
     }
 
-    @OnClick (R.id.add_location_fab)
+    @SuppressLint("MissingPermission")
+    @OnClick(R.id.add_location_fab)
     void addFabClicked() {
+        // TODO Add the Geofence, Need Callback
+        mGeofenceBuilder.addGeofence(null);
         // Create a Geofencing Request
-
+        mGeofencingClient.addGeofences(mGeofenceBuilder.getGeofencingRequest(),
+                getGeofencingPendingIntent())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "addFabClicked: geofences_added: should show someting on UI Thread");
+                }).addOnFailureListener(e -> {
+                    Log.d(TAG, "addFabClicked: geofence_add_failed: should show error");
+                });
     }
 
     @Override
@@ -276,6 +339,9 @@ public class MainActivity extends AppCompatActivity implements
         // Pop BottomSheet
         mBottomSheetBehavior.setPeekHeight(600);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+        mFabLayoutParams.setAnchorId(R.id.bottom_sheet);
+        mFab.setLayoutParams(mFabLayoutParams);
 
     }
 

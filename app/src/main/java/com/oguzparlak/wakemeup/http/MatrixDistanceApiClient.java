@@ -2,6 +2,7 @@ package com.oguzparlak.wakemeup.http;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -107,11 +108,11 @@ public class MatrixDistanceApiClient {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 try(ResponseBody responseBody = response.body()) {
                     JsonParser parser = new JsonParser();
                     httpCallback.onFinished(response.code(),
-                            parser.parse(response.body().string()).getAsJsonObject());
+                            parser.parse(responseBody.string()).getAsJsonObject());
                 }
             }
         });
