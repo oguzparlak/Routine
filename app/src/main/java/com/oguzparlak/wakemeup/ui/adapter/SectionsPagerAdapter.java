@@ -1,10 +1,12 @@
 package com.oguzparlak.wakemeup.ui.adapter;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 
+import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.ui.fragment.MapFragment;
 import com.oguzparlak.wakemeup.ui.fragment.MyActivityFragment;
 import com.oguzparlak.wakemeup.ui.fragment.TaskListFragment;
@@ -20,8 +22,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private static final String TAG = SectionsPagerAdapter.class.getSimpleName();
 
-    public SectionsPagerAdapter(FragmentManager fm) {
+    private Context mContext;
+
+    public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
+        mContext = context;
     }
 
     @Override
@@ -38,21 +43,21 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         }
     }
 
-    /*
+
     @Override
     public CharSequence getPageTitle(int position) {
         switch (position) {
             case 0:
-                return "Map";
+                return mContext.getString(R.string.map);
             case 1:
-                return "Activity";
+                return mContext.getString(R.string.locations);
             case 2:
-                return "Locations";
+                return mContext.getString(R.string.activity);
             default:
                 return null;
         }
     }
-    */
+
 
     @Override
     public int getCount() {

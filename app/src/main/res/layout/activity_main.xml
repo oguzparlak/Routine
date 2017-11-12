@@ -43,7 +43,8 @@
             android:layout_gravity="start"
             app:tabMode="scrollable"
             app:tabIndicatorColor="@color/white"
-            app:tabGravity="center"/>
+            app:tabGravity="center"
+            style="@style/AppTabLayout"/>
 
     </android.support.design.widget.AppBarLayout>
 

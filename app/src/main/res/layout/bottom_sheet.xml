@@ -52,7 +52,7 @@
         <TextView
             android:id="@+id/current_location_label"
             android:layout_marginTop="5dp"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/current_location_image_view"

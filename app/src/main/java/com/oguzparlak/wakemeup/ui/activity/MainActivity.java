@@ -24,6 +24,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
@@ -78,10 +79,6 @@ public class MainActivity extends AppCompatActivity implements
     private TextView mAddressIndicator;
     private TextView mCurrentLocationLabel;
 
-    // Fab
-    CoordinatorLayout.LayoutParams mFabLayoutParams;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements
         // Apply ButterKnife
         ButterKnife.bind(this);
 
-        mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
-
         setSupportActionBar(mToolbar);
 
         if (getSupportActionBar() != null)
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements
 
         setupGoogleApiClient();
 
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         mViewPager.setAdapter(sectionsPagerAdapter);
 
         mTabLayout.setupWithViewPager(mViewPager);
@@ -118,15 +113,25 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    mFabLayoutParams.setAnchorId(View.NO_ID);
-                    mFab.setLayoutParams(mFabLayoutParams);
-                    mFab.hide();
+                    // mFabLayoutParams.setAnchorId(View.NO_ID);
+                    // mFab.setLayoutParams(mFabLayoutParams);
+                    // mFab.hide();
                 }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
+                // Change the alpha of the fab
+                // as the BottomSheet slides
+                if (slideOffset <= 0 && slideOffset >= -1)
+                    mFab.setAlpha(slideOffset + 1);
+                // If the slideOffset has reached the threshold
+                // Disable it, otherwise enable.
+                if (slideOffset <= -1) {
+                    mFab.setClickable(false);
+                } else {
+                    mFab.setClickable(true);
+                }
             }
         });
 
@@ -168,7 +173,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @OnClick (R.id.add_location_fab)
     void addFabClicked() {
-        // TODO Implement it later
+        // Create a Geofencing Request
+
     }
 
     @Override
@@ -271,8 +277,6 @@ public class MainActivity extends AppCompatActivity implements
         mBottomSheetBehavior.setPeekHeight(600);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
-        mFabLayoutParams.setAnchorId(R.id.bottom_sheet);
-        mFab.setLayoutParams(mFabLayoutParams);
     }
 
     /**
