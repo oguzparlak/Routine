@@ -3,15 +3,10 @@ package com.oguzparlak.wakemeup.ui.fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -20,54 +15,39 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.http.MatrixDistanceApiClient;
 import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
-import com.oguzparlak.wakemeup.ui.activity.MainActivity;
+import com.oguzparlak.wakemeup.ui.adapter.MapAdapter;
 import com.oguzparlak.wakemeup.ui.callbacks.DistanceMatrixCallback;
 import com.oguzparlak.wakemeup.ui.callbacks.GooglePlaceSelectionListener;
-import com.oguzparlak.wakemeup.ui.callbacks.HttpCallback;
 import com.oguzparlak.wakemeup.utils.BitmapUtils;
 import com.oguzparlak.wakemeup.utils.LocationUtil;
-
-import org.json.JSONObject;
-
-import java.security.Permission;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import okhttp3.OkHttpClient;
 
 /**
  * @author Oguz Parlak
@@ -113,6 +93,7 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
 
     @BindView(R.id.map_view)
     MapView mGoogleMapView;
+    private MapAdapter mMapAdapter;
 
     @Override
     public void onAttach(Context context) {
@@ -174,6 +155,9 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
                     LOCATION_REQUEST);
         }
 
+        // Init MapAdapter
+        mMapAdapter = new MapAdapter(getContext(), mGoogleMap);
+
         // Hide myLocation Button
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
@@ -182,6 +166,7 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
 
         // MapClickListener
         mGoogleMap.setOnMapClickListener(this);
+
     }
 
     /**
@@ -317,16 +302,8 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
             return;
         }
 
-        // Put a marker
-        Marker marker = putMarker(latLng);
-
-        final float currentZoomLevel = mGoogleMap.getCameraPosition().zoom;
-        if (currentZoomLevel < 15) {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
-        } else {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), currentZoomLevel));
-        }
-
+        // Mark the desired point
+        mMapAdapter.markPoint(latLng);
     }
 
     /**
@@ -338,14 +315,5 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-    }
-
-    private Marker putMarker(LatLng latLng) {
-        return mGoogleMap.addMarker(
-                new MarkerOptions()
-                        .position(latLng)
-                        .title("Mountain View")
-                        .icon(BitmapUtils.bitmapDescriptorFromVector(getContext(), R.drawable.ic_marker_48dp))
-        );
     }
 }

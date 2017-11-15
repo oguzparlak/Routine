@@ -23,4 +23,6 @@
     <color name="white">@android:color/white</color>
     <color name="colorLightGrey">#e0e0e0</color>
 
+    <color name="colorTransparentPrimary">#4603a9f4</color>
+
 </resources>

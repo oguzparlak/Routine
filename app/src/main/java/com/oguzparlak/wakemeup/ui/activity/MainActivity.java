@@ -1,10 +1,8 @@
 package com.oguzparlak.wakemeup.ui.activity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,7 +10,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -29,16 +26,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.oguzparlak.wakemeup.R;
 import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
 import com.oguzparlak.wakemeup.service.GeofenceTransitionIntentService;
@@ -50,8 +41,6 @@ import com.oguzparlak.wakemeup.ui.callbacks.TaskListFragmentCallbacks;
 import com.oguzparlak.wakemeup.ui.fragment.MapFragment;
 import com.oguzparlak.wakemeup.ui.fragment.TaskListFragment;
 import com.oguzparlak.wakemeup.utils.GeofenceBuilder;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -337,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements
         mCurrentLocationLabel.setVisibility(View.INVISIBLE);
 
         // Pop BottomSheet
-        mBottomSheetBehavior.setPeekHeight(600);
+        mBottomSheetBehavior.setPeekHeight(800);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
         mFabLayoutParams.setAnchorId(R.id.bottom_sheet);

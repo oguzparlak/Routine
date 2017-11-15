@@ -13,13 +13,13 @@ import android.view.MotionEvent;
  * </p/
  **/
 
-public class NonSwipeableWiewPager extends ViewPager {
+public class NonSwipeableViewPager extends ViewPager {
 
-    public NonSwipeableWiewPager(Context context) {
+    public NonSwipeableViewPager(Context context) {
         super(context);
     }
 
-    NonSwipeableWiewPager(Context context, AttributeSet attributeSet) {
+    NonSwipeableViewPager(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
     }
 

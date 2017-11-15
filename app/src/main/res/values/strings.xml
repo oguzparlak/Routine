@@ -14,4 +14,7 @@
     <string name="no_connection">Connection Lost</string>
     <string name="current_location">Current Location</string>
     <string name="activity">Activity</string>
+    <string name="driving">Driving</string>
+    <string name="walking">Walking</string>
+    <string name="transit">Transit</string>
 </resources>
