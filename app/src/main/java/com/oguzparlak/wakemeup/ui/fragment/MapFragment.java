@@ -42,8 +42,12 @@ import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
 import com.oguzparlak.wakemeup.ui.adapter.MapAdapter;
 import com.oguzparlak.wakemeup.ui.callbacks.DistanceMatrixCallback;
 import com.oguzparlak.wakemeup.ui.callbacks.GooglePlaceSelectionListener;
+import com.oguzparlak.wakemeup.ui.callbacks.HttpCallback;
 import com.oguzparlak.wakemeup.utils.BitmapUtils;
 import com.oguzparlak.wakemeup.utils.LocationUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -134,15 +138,6 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
             Log.e(TAG, "onMapReady: " + ex.getMessage());
         }
 
-        LatLng mountainView = new LatLng(37.4, -122.1);
-
-        Marker marker = mGoogleMap.addMarker(
-                new MarkerOptions()
-                        .position(mountainView)
-                        .title("Mountain View")
-                        .icon(BitmapUtils.bitmapDescriptorFromVector(getContext(), R.drawable.ic_marker_48dp))
-        );
-
         // Prepare Map for current Location
         if (PermissionChecker.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -230,52 +225,56 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
         // The distance between current location and destination
         final float distance = mLocationUtil.getDistanceTo(destination);
 
-        // If desired location distance is less than 100 meters than set mode to be walking
-        String travelMode = distance < 100 ? MatrixDistanceApiClient.MODE_WALKING : MatrixDistanceApiClient.MODE_DRIVING;
-
         MatrixDistanceApiClient matrixDistanceApiClient = MatrixDistanceApiClient.getInstance();
         matrixDistanceApiClient.setSource(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
         matrixDistanceApiClient.setDestination(latLng);
+
+        String[] travelModes = buildTravelModes(distance).toArray(new String[0]);
 
         if (isConnected()) {
             // Prepare the BottomSheet
             mDistanceMatrixCallback.onPrepare();
 
-            // Make Api Call
-            matrixDistanceApiClient.makeCall(travelMode,
-                    (statusCode, response) -> {
+            // Make Api Call for three type of travel
+            // Driving, Walking and Transit
+            matrixDistanceApiClient.makeNestedCall(new HttpCallback() {
+                @Override
+                public void onFinished(String travelMode, int statusCode, JsonObject response) {
+                    if (statusCode == 200) {
+                        String destinationAddress = response
+                                .getAsJsonArray("destination_addresses")
+                                .get(0).getAsString();
 
-                        if (statusCode == 200) {
-                            String destinationAddress = response
-                                    .getAsJsonArray("destination_addresses")
-                                    .get(0).getAsString();
-                            Log.d(TAG, "onMapClick: destination_address: " + destinationAddress);
+                        JsonObject elementRoot =  response.getAsJsonArray("rows")
+                                .get(0).getAsJsonObject().getAsJsonArray("elements")
+                                .get(0).getAsJsonObject();
 
-                            JsonObject elementRoot =  response.getAsJsonArray("rows")
-                                    .get(0).getAsJsonObject().getAsJsonArray("elements")
-                                    .get(0).getAsJsonObject();
+                        String distanceText = elementRoot.getAsJsonObject("distance")
+                                .get("text").getAsString();
 
-                            String distanceText = elementRoot.getAsJsonObject("distance")
-                                    .get("text").getAsString();
+                        String duration = elementRoot.getAsJsonObject("duration")
+                                .get("text").getAsString();
 
-                            String duration = elementRoot.getAsJsonObject("duration")
-                                    .get("text").getAsString();
+                        MatrixDistanceModel matrixDistanceModel =
+                                new MatrixDistanceModel(travelMode, destinationAddress, distanceText, duration);
 
-                            MatrixDistanceModel matrixDistanceModel =
-                                    new MatrixDistanceModel(destinationAddress, distanceText, duration);
+                        // Pass the model to Activity
+                        mDistanceMatrixCallback.onModelReceived(matrixDistanceModel);
 
-                            // Pass the model to Activity
-                            mDistanceMatrixCallback.onModelReceived(matrixDistanceModel);
+                    } else {
+                        Log.e(TAG, "onMapClick: Http call ended with a failure: " + statusCode);
+                    }
 
-                            Log.d(TAG, "onMapClick: distance: " + distanceText);
-                            Log.d(TAG, "onMapClick: duration: " + duration);
+                }
 
-                        } else {
-                            Log.e(TAG, "onMapClick: Http call ended with a failure: " + statusCode);
-                        }
+                @Override
+                public void onError(int errorCode) {
+                    Log.e(TAG, "onError: errorCode: " + errorCode);
+                    // pass the null object
+                    mDistanceMatrixCallback.onModelReceived(null);
+                }
 
-                    });
-
+            }, travelModes);
         } else {
             // Pop a dialog to user
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -312,8 +311,21 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
     private boolean isConnected() {
         ConnectivityManager cm =
                 (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = null;
+        if (cm != null) {
+            activeNetwork = cm.getActiveNetworkInfo();
+        }
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
     }
-}
+
+    private List<String> buildTravelModes(float distance) {
+        List<String> travelModes = new ArrayList<>();
+        travelModes.add(MatrixDistanceApiClient.MODE_DRIVING);
+        travelModes.add(MatrixDistanceApiClient.MODE_TRANSIT);
+        if (distance < 5000) {
+            travelModes.add(MatrixDistanceApiClient.MODE_WALKING);
+        }
+        return travelModes;
+    }
+ }

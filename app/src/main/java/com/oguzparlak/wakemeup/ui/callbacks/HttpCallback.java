@@ -2,6 +2,8 @@ package com.oguzparlak.wakemeup.ui.callbacks;
 
 import com.google.gson.JsonObject;
 
+import org.json.JSONObject;
+
 /**
  * @author Oguz Parlak
  * <p>
@@ -10,5 +12,6 @@ import com.google.gson.JsonObject;
  **/
 
 public interface HttpCallback {
-    void onFinished(int statusCode, JsonObject response);
+    void onFinished(String travelMode, int statusCode, JsonObject response);
+    void onError(int errorCode);
 }

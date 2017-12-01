@@ -97,6 +97,9 @@ public class MatrixDistanceApiClient {
         return sInstance;
     }
 
+    /**
+     * Makes an API call for the given travel mode
+     */
     public void makeCall(String mode, HttpCallback httpCallback) {
         Request request = new Request.Builder()
                 .url(buildUrl(mOrigin, mDestination, mode))
@@ -111,11 +114,21 @@ public class MatrixDistanceApiClient {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 try(ResponseBody responseBody = response.body()) {
                     JsonParser parser = new JsonParser();
-                    httpCallback.onFinished(response.code(),
+                    httpCallback.onFinished(mode, response.code(),
                             parser.parse(responseBody.string()).getAsJsonObject());
+                } catch (Exception ex) {
+                    httpCallback.onError(response.code());
                 }
             }
         });
+    }
+
+    /**
+     * Makes an API call for the specified travel modes
+     */
+    public void makeNestedCall(HttpCallback callback, String... types) {
+        for (String type : types)
+            makeCall(type, callback);
     }
 
     public void setSource(LatLng latLng) {

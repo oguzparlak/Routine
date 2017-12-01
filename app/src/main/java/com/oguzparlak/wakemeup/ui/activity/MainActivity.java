@@ -31,6 +31,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.oguzparlak.wakemeup.R;
+import com.oguzparlak.wakemeup.http.MatrixDistanceApiClient;
 import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
 import com.oguzparlak.wakemeup.service.GeofenceTransitionIntentService;
 import com.oguzparlak.wakemeup.ui.adapter.SectionsPagerAdapter;
@@ -83,13 +84,13 @@ public class MainActivity extends AppCompatActivity implements
 
     // BottomSheet View Components
     private BottomSheetBehavior mBottomSheetBehavior;
-    private TextView mDestinationAddressTextView;
-    private TextView mDurationTextView;
-    private TextView mDistanceTextView;
-    private ImageView mCurrentLocationImageView;
-    private View mDivider;
+    private TextView mAddressInfoTextView;
     private TextView mAddressIndicator;
-    private TextView mCurrentLocationLabel;
+    private TextView mDrivingInfoTextView;
+    private TextView mWalkingInfoTextView;
+    private TextView mTransitInfoTextView;
+    private ImageView mErrorImageView;
+    private TextView mErrorTextView;
 
     /**
      * Geofencing client will register or
@@ -164,13 +165,13 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        mDestinationAddressTextView = mBottomSheet.findViewById(R.id.destination_address_text_view);
-        mDurationTextView = mBottomSheet.findViewById(R.id.estimated_time_text_view);
-        mDistanceTextView = mBottomSheet.findViewById(R.id.distance_text_view);
-        mCurrentLocationImageView = mBottomSheet.findViewById(R.id.current_location_image_view);
-        mDivider = mBottomSheet.findViewById(R.id.divider);
+        mAddressInfoTextView = mBottomSheet.findViewById(R.id.address_info_text_view);
         mAddressIndicator = mBottomSheet.findViewById(R.id.destination_label);
-        mCurrentLocationLabel = mBottomSheet.findViewById(R.id.current_location_label);
+        mDrivingInfoTextView = mBottomSheet.findViewById(R.id.driving_info_text_view);
+        mWalkingInfoTextView = mBottomSheet.findViewById(R.id.walking_info_text_view);
+        mTransitInfoTextView = mBottomSheet.findViewById(R.id.transit_info_text_view);
+        mErrorImageView = mBottomSheet.findViewById(R.id.error_image_view);
+        mErrorTextView = mBottomSheet.findViewById(R.id.error_text_view);
 
         mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
     }
@@ -317,13 +318,8 @@ public class MainActivity extends AppCompatActivity implements
         progressBar.setVisibility(View.VISIBLE);
 
         // Hide other View components
-        mDestinationAddressTextView.setVisibility(View.INVISIBLE);
-        mDurationTextView.setVisibility(View.INVISIBLE);
-        mDistanceTextView.setVisibility(View.INVISIBLE);
-        mCurrentLocationImageView.setVisibility(View.INVISIBLE);
-        mDivider.setVisibility(View.INVISIBLE);
+        mAddressInfoTextView.setVisibility(View.INVISIBLE);
         mAddressIndicator.setVisibility(View.INVISIBLE);
-        mCurrentLocationLabel.setVisibility(View.INVISIBLE);
 
         // Pop BottomSheet
         mBottomSheetBehavior.setPeekHeight(800);
@@ -346,19 +342,45 @@ public class MainActivity extends AppCompatActivity implements
             ProgressBar progressBar = mBottomSheet.findViewById(R.id.bottom_sheet_progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
 
-            // Set visible other components
-            mDestinationAddressTextView.setVisibility(View.VISIBLE);
-            mDurationTextView.setVisibility(View.VISIBLE);
-            mDistanceTextView.setVisibility(View.VISIBLE);
-            mCurrentLocationImageView.setVisibility(View.VISIBLE);
-            mDivider.setVisibility(View.VISIBLE);
-            mAddressIndicator.setVisibility(View.VISIBLE);
-            mCurrentLocationLabel.setVisibility(View.VISIBLE);
+            if (model == null) {
+                // TODO
+                // Handle error
+                // Reset all UI Components
+                mErrorImageView.setVisibility(View.VISIBLE);
+                mErrorTextView.setVisibility(View.VISIBLE);
+                mAddressIndicator.setVisibility(View.INVISIBLE);
+                mAddressInfoTextView.setVisibility(View.INVISIBLE);
+                mFab.hide();
+                return;
+            }
 
-            mDestinationAddressTextView.setText(model.getDestinationAddress());
-            mDurationTextView.setText("Duration: " + model.getDuration());
-            mDistanceTextView.setText("Distance: " + model.getDistance());
+            // Set visible other components
+            mAddressInfoTextView.setVisibility(View.VISIBLE);
+            mAddressIndicator.setVisibility(View.VISIBLE);
+
+            mAddressInfoTextView.setText(model.getDestinationAddress());
             mAddressIndicator.setText(model.getDestinationAddress().substring(0, 1));
+
+            String travelInformation = model.getDistance() + " - " + model.getDuration();
+
+            switch (model.getTravelType()) {
+                case MatrixDistanceApiClient.MODE_DRIVING:
+                    mDrivingInfoTextView.setText(travelInformation);
+                    break;
+                case MatrixDistanceApiClient.MODE_WALKING:
+                    mWalkingInfoTextView.setText(travelInformation);
+                    break;
+                case MatrixDistanceApiClient.MODE_TRANSIT:
+                    mTransitInfoTextView.setText(travelInformation);
+                    break;
+            }
+
+            // If desired location is more than 5 km away
+            // Don't update the walking info
+            double distance = Double.parseDouble(model.getDistance().split(" ")[0]);
+            if (distance > 5) {
+                mWalkingInfoTextView.setText("-");
+            }
 
             // Show fab
             mFab.show();
@@ -366,4 +388,5 @@ public class MainActivity extends AppCompatActivity implements
 
         });
     }
+
 }

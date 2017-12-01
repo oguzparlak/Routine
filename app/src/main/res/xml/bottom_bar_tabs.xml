@@ -1,14 +1,11 @@
 <tabs>
     <tab
         id="@+id/tab_driving"
-        icon="@drawable/ic_directions_car_24dp"
-        title="@string/driving" />
+        icon="@drawable/ic_directions_car_24dp" />
     <tab
         id="@+id/tab_transport"
-        icon="@drawable/ic_directions_transit_24dp"
-        title="@string/transit" />
+        icon="@drawable/ic_directions_transit_24dp" />
     <tab
         id="@+id/tab_walking"
-        icon="@drawable/ic_directions_walk_24dp"
-        title="@string/walking" />
+        icon="@drawable/ic_directions_walk_24dp" />
 </tabs>

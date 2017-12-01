@@ -29,7 +29,7 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="BottomTextAppearance" parent="BB_BottomBarItem_Shifting.TitleAppearance">
+    <style name="BottomNavigationItem" parent="BottomNavigationItem">
         <item name="android:fontFamily">@font/hind_bold</item>
         <item name="android:textSize">12sp</item>
     </style>

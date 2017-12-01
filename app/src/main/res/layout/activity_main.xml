@@ -62,8 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:visibility="invisible"
-        android:src="@drawable/ic_directions_white_24dp"
-        app:backgroundTint="@color/colorMaterialOrange"
+        android:src="@drawable/ic_access_alarm_white_24dp"
         app:layout_anchorGravity="end|top"/>
 
     <include layout="@layout/bottom_sheet" />
