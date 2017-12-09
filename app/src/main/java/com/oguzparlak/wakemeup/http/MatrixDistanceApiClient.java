@@ -145,7 +145,7 @@ public class MatrixDistanceApiClient {
                 .appendQueryParameter(PARAM_ORIGIN, buildLatLng(origin))
                 .appendQueryParameter(PARAM_DESTINATION, buildLatLng(destination))
                 .appendQueryParameter(PARAM_KEY, Constants.KEY_DISTANCE_MATRIX_API);
-        if (!(travelMode == null || TextUtils.isEmpty(travelMode))) {
+        if (!TextUtils.isEmpty(travelMode)) {
             builder.appendQueryParameter(PARAM_MODE, travelMode);
         }
         Uri uri = builder.build();

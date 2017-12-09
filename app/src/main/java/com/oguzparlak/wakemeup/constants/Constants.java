@@ -12,6 +12,13 @@ import com.oguzparlak.wakemeup.provider.TaskContract;
 public class Constants {
 
     /**
+     * Distance Thresholds in meters
+     */
+    public static final int WALKING_DISTANCE_THRESHOLD = 5000;
+    public static final int TRANSIT_DISTANCE_THRESHOLD = 60000;
+    public static final int DISTANCE_THRESHOLD = 80000;
+
+    /**
      * Extras
      */
     public static final String DESTINATION_ADDRESS_EXTRA = "destination_extra";

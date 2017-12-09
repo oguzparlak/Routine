@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -63,17 +64,12 @@ public class MainActivity extends AppCompatActivity implements
      */
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
-    @BindView(R.id.add_location_fab)
-    FloatingActionButton mFab;
     @BindView(R.id.view_pager)
     ViewPager mViewPager;
     @BindView(R.id.tabs)
     TabLayout mTabLayout;
     @BindView(R.id.bottom_sheet)
     View mBottomSheet;
-
-    // Fab
-    CoordinatorLayout.LayoutParams mFabLayoutParams;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -91,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements
     private TextView mTransitInfoTextView;
     private ImageView mErrorImageView;
     private TextView mErrorTextView;
+    private Button mAddGeofenceButton;
 
     /**
      * Geofencing client will register or
@@ -154,13 +151,13 @@ public class MainActivity extends AppCompatActivity implements
                 // Change the alpha of the fab
                 // as the BottomSheet slides
                 if (slideOffset <= 0 && slideOffset >= -1)
-                    mFab.setAlpha(slideOffset + 1);
+                     mAddGeofenceButton.setAlpha(slideOffset + 1);
                 // If the slideOffset has reached the threshold
                 // Disable it, otherwise enable.
                 if (slideOffset <= -1) {
-                    mFab.setClickable(false);
+                    mAddGeofenceButton.setEnabled(false);
                 } else {
-                    mFab.setClickable(true);
+                    mAddGeofenceButton.setEnabled(true);
                 }
             }
         });
@@ -172,8 +169,7 @@ public class MainActivity extends AppCompatActivity implements
         mTransitInfoTextView = mBottomSheet.findViewById(R.id.transit_info_text_view);
         mErrorImageView = mBottomSheet.findViewById(R.id.error_image_view);
         mErrorTextView = mBottomSheet.findViewById(R.id.error_text_view);
-
-        mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
+        mAddGeofenceButton = mBottomSheet.findViewById(R.id.add_geofence_button);
     }
 
     private PendingIntent getGeofencingPendingIntent() {
@@ -216,17 +212,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @SuppressLint("MissingPermission")
-    @OnClick(R.id.add_location_fab)
-    void addFabClicked() {
+    @OnClick(R.id.add_geofence_button)
+    void addGeofenceButtonClicked() {
         // TODO Add the Geofence, Need Callback
         mGeofenceBuilder.addGeofence(null);
         // Create a Geofencing Request
         mGeofencingClient.addGeofences(mGeofenceBuilder.getGeofencingRequest(),
                 getGeofencingPendingIntent())
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "addFabClicked: geofences_added: should show someting on UI Thread");
+                    Log.d(TAG, "addGeofenceButtonClicked: geofences_added: should show someting on UI Thread");
                 }).addOnFailureListener(e -> {
-                    Log.d(TAG, "addFabClicked: geofence_add_failed: should show error");
+                    Log.d(TAG, "addGeofenceButtonClicked: geofence_add_failed: should show error");
                 });
     }
 
@@ -311,6 +307,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onCheckChanged(boolean checked, int id) { }
 
+    /**
+     * DistanceMatrixCallbacks
+     */
     @Override
     public void onPrepare() {
         // Show a progress bar to user
@@ -324,9 +323,6 @@ public class MainActivity extends AppCompatActivity implements
         // Pop BottomSheet
         mBottomSheetBehavior.setPeekHeight(800);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-
-        mFabLayoutParams.setAnchorId(R.id.bottom_sheet);
-        mFab.setLayoutParams(mFabLayoutParams);
 
     }
 
@@ -343,20 +339,11 @@ public class MainActivity extends AppCompatActivity implements
             progressBar.setVisibility(View.INVISIBLE);
 
             if (model == null) {
-                // TODO
-                // Handle error
-                // Reset all UI Components
-                mErrorImageView.setVisibility(View.VISIBLE);
-                mErrorTextView.setVisibility(View.VISIBLE);
-                mAddressIndicator.setVisibility(View.INVISIBLE);
-                mAddressInfoTextView.setVisibility(View.INVISIBLE);
-                mFab.hide();
+                toggleBottomSheetComponents(true);
                 return;
+            } else {
+                toggleBottomSheetComponents(false);
             }
-
-            // Set visible other components
-            mAddressInfoTextView.setVisibility(View.VISIBLE);
-            mAddressIndicator.setVisibility(View.VISIBLE);
 
             mAddressInfoTextView.setText(model.getDestinationAddress());
             mAddressIndicator.setText(model.getDestinationAddress().substring(0, 1));
@@ -377,16 +364,30 @@ public class MainActivity extends AppCompatActivity implements
 
             // If desired location is more than 5 km away
             // Don't update the walking info
-            double distance = Double.parseDouble(model.getDistance().split(" ")[0]);
-            if (distance > 5) {
+            String distance = model.getDistance().split(" ")[0];
+            if (distance.compareTo("5") > 0) {
                 mWalkingInfoTextView.setText("-");
             }
 
-            // Show fab
-            mFab.show();
-
-
         });
+    }
+
+    private void toggleBottomSheetComponents(boolean shouldShowError) {
+        final int visibility = shouldShowError ? View.INVISIBLE : View.VISIBLE;
+        mAddressInfoTextView.setVisibility(visibility);
+        mAddressIndicator.setVisibility(visibility);
+        mAddGeofenceButton.setVisibility(visibility);
+        if (shouldShowError) {
+            mErrorImageView.setVisibility(View.VISIBLE);
+            mErrorTextView.setVisibility(View.VISIBLE);
+            mWalkingInfoTextView.setText(" - ");
+            mDrivingInfoTextView.setText(" - ");
+            mTransitInfoTextView.setText(" - ");
+        } else {
+            mErrorTextView.setVisibility(View.INVISIBLE);
+            mErrorTextView.setVisibility(View.INVISIBLE);
+        }
+
     }
 
 }

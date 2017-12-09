@@ -17,4 +17,5 @@
     <string name="driving">Driving</string>
     <string name="walking">Walking</string>
     <string name="transit">Transit</string>
+    <string name="ok">OK</string>
 </resources>

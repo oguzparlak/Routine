@@ -37,6 +37,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.JsonObject;
 import com.oguzparlak.wakemeup.R;
+import com.oguzparlak.wakemeup.constants.Constants;
 import com.oguzparlak.wakemeup.http.MatrixDistanceApiClient;
 import com.oguzparlak.wakemeup.model.MatrixDistanceModel;
 import com.oguzparlak.wakemeup.ui.adapter.MapAdapter;
@@ -231,6 +232,16 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
 
         String[] travelModes = buildTravelModes(distance).toArray(new String[0]);
 
+        // Mark the desired point
+        mMapAdapter.markPoint(latLng);
+
+        // If the distance betweeen two location exceeds
+        // the threshold then pass null object and display error
+        if (distance > Constants.DISTANCE_THRESHOLD) {
+            mDistanceMatrixCallback.onModelReceived(null);
+            return;
+        }
+
         if (isConnected()) {
             // Prepare the BottomSheet
             mDistanceMatrixCallback.onPrepare();
@@ -297,12 +308,7 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
             alertDialog.getWindow().setLayout(800, 800);
-
-            return;
         }
-
-        // Mark the desired point
-        mMapAdapter.markPoint(latLng);
     }
 
     /**
@@ -319,12 +325,20 @@ public class MapFragment extends Fragment implements GooglePlaceSelectionListene
                 activeNetwork.isConnectedOrConnecting();
     }
 
+    /**
+     * Prepares the travel mode list
+     * to be sent to DistanceMatrixAPI
+     */
     private List<String> buildTravelModes(float distance) {
         List<String> travelModes = new ArrayList<>();
-        travelModes.add(MatrixDistanceApiClient.MODE_DRIVING);
-        travelModes.add(MatrixDistanceApiClient.MODE_TRANSIT);
-        if (distance < 5000) {
+        if (distance < Constants.DISTANCE_THRESHOLD) {
+            travelModes.add(MatrixDistanceApiClient.MODE_DRIVING);
+        }
+        if (distance < Constants.WALKING_DISTANCE_THRESHOLD) {
             travelModes.add(MatrixDistanceApiClient.MODE_WALKING);
+        }
+        if (distance < Constants.TRANSIT_DISTANCE_THRESHOLD) {
+            travelModes.add(MatrixDistanceApiClient.MODE_TRANSIT);
         }
         return travelModes;
     }
